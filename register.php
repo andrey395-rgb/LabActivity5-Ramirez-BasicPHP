@@ -1,5 +1,10 @@
 <?php
-// Unprotected route: logged-in users don't belong here.
+// Unprotected route: logged-in users don't belong here (enforced via PHP session).
+session_start();
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+    header('Location: index.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,12 +26,6 @@
 </style>
 </head>
 <body>
-
-<script>
-    if (localStorage.getItem('isLoggedIn') === 'true') {
-        window.location.replace('index.php');
-    }
-</script>
 
 <div class="card">
     <h1>Create an Account</h1>

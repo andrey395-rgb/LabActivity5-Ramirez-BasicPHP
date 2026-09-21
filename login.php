@@ -1,5 +1,10 @@
 <?php
-// Unprotected route: logged-in users don't belong here.
+// Unprotected route: logged-in users don't belong here (enforced via PHP session).
+session_start();
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+    header('Location: index.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,12 +25,6 @@
 </style>
 </head>
 <body>
-
-<script>
-    if (localStorage.getItem('isLoggedIn') === 'true') {
-        window.location.replace('index.php');
-    }
-</script>
 
 <div class="card">
     <h1>Login</h1>
@@ -85,8 +84,23 @@
             return;
         }
 
-        localStorage.setItem('isLoggedIn', 'true');
-        window.location.href = 'index.php';
+        fetch('session_login.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: storedUser.email })
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.status === 'ok') {
+                    localStorage.setItem('isLoggedIn', 'true');
+                    window.location.href = 'index.php';
+                } else {
+                    document.getElementById('passwordError').textContent = 'Something went wrong. Please try again.';
+                }
+            })
+            .catch(function () {
+                document.getElementById('passwordError').textContent = 'Something went wrong. Please try again.';
+            });
     });
 </script>
 

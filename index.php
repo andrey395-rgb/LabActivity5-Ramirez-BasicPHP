@@ -1,5 +1,10 @@
 <?php
-// Protected route: only reachable while logged in.
+// Protected route: only reachable while logged in (enforced via PHP session).
+session_start();
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header('Location: login.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,27 +22,18 @@
 </head>
 <body>
 
-<script>
-    if (localStorage.getItem('isLoggedIn') !== 'true') {
-        window.location.replace('login.php');
-    }
-</script>
-
 <div class="card">
     <h1>Welcome!</h1>
-    <p id="welcomeMessage">You are logged in.</p>
+    <p id="welcomeMessage">You are logged in as <?php echo htmlspecialchars($_SESSION['email']); ?></p>
     <button id="logoutButton">Logout</button>
 </div>
 
 <script>
-    const storedUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
-    if (storedUser && storedUser.email) {
-        document.getElementById('welcomeMessage').textContent = 'You are logged in as ' + storedUser.email;
-    }
-
     document.getElementById('logoutButton').addEventListener('click', function () {
-        localStorage.removeItem('isLoggedIn');
-        window.location.href = 'login.php';
+        fetch('logout.php').then(function () {
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.php';
+        });
     });
 </script>
 
